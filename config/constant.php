@@ -65,5 +65,7 @@ return [
     'ADMINISTRATOR_EMAIL_SA' => env('ADMINISTRATOR_EMAIL_SA','vicsales@flexibledrive.com.au'),
     'ADMINISTRATOR_EMAIL_TAS' => env('ADMINISTRATOR_EMAIL_TAS','vicsales@flexibledrive.com.au'),
     'ADMINISTRATOR_EMAIL_VIC' => env('ADMINISTRATOR_EMAIL_VIC','vicsales@flexibledrive.com.au'),
-    'ADMINISTRATOR_EMAIL_WA' => env('ADMINISTRATOR_EMAIL_WA','vicsales@flexibledrive.com.au'),    
+    'ADMINISTRATOR_EMAIL_WA' => env('ADMINISTRATOR_EMAIL_WA','vicsales@flexibledrive.com.au'),  
+    'administrator_email_generic' => env('ADMINISTRATOR_EMAIL_Generic','vicsales@flexibledrive.com.au'),
+    
 ];

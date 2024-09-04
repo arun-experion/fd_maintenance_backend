@@ -29,12 +29,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('sync:partsdb')->daily()->evenInMaintenanceMode()->withoutOverlapping();
-        //$schedule->command('sync:sageapi')->daily()->evenInMaintenanceMode()->withoutOverlapping();
+        // $schedule->command('sync:partsdb')->dailyAt('19:36')->timezone('Asia/Kolkata')->evenInMaintenanceMode()->withoutOverlapping();
+        $schedule->command('sync:partsdb')->dailyAt('02:00')->timezone('Australia/Melbourne')->evenInMaintenanceMode()->withoutOverlapping();
+        // $schedule->command('sync:sageapi')->daily()->evenInMaintenanceMode()->withoutOverlapping();
         // $schedule->command('sync:product:prices')->daily()->evenInMaintenanceMode()->withoutOverlapping();
         // $schedule->command('sync:product:qty')->daily()->evenInMaintenanceMode()->withoutOverlapping();
-
-        $schedule->command('sync:csvproduct:prices')->dailyAt('11:15')->evenInMaintenanceMode()->withoutOverlapping()->runInBackground();
+        //$schedule->command('sync:csvproduct:prices')->dailyAt('12:12')->timezone('Asia/Kolkata')->evenInMaintenanceMode()->withoutOverlapping()->runInBackground();
+        $schedule->command('sync:csvproduct:prices')->dailyAt('21:00')->timezone('Australia/Melbourne')->evenInMaintenanceMode()->withoutOverlapping()->runInBackground();
+        //$schedule->command('sync:csvproduct:prices')->dailyAt('11:15')->evenInMaintenanceMode()->withoutOverlapping()->runInBackground();
         $schedule->command('sync:csvproduct:qty')->hourly()->evenInMaintenanceMode()->withoutOverlapping()->runInBackground();
         // $schedule->command('sync:csvproduct:qty')->everyTwoHours()->evenInMaintenanceMode()->withoutOverlapping()->runInBackground();
         //$schedule->command('sync:csvproduct:qty')->dailyAt('21:00')->evenInMaintenanceMode()->withoutOverlapping()->runInBackground();

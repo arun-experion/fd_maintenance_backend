@@ -42,6 +42,7 @@ class SyncFromPartsDB extends Command
     protected $description = 'This will update local databse for parts/prducts related data from partsdb with the use of API';
 
     public $last_updated = null;
+    public $date_convert = null;
 
     /**
      * Create a new command instance.
@@ -55,6 +56,9 @@ class SyncFromPartsDB extends Command
 
         $this->PRODUCTS_PATH = Config::get('constant.PRODUCTS_PATH');
         $this->last_updated = date('Y-m-d');
+        // $date_create = date_create("2000-01-01");
+        // $this->date_convert= date_format($date_create,"Ymd");
+        // $this->date_convert= date('Ymd', strtotime('-1 days'));
     }
 
     /**
@@ -74,15 +78,15 @@ class SyncFromPartsDB extends Command
         $import_script->save();
 
         // Get all brands that available to the customer from parts db and import in local database
-        // echo "Start : Import Brands \n";
-        // $this->importBrands();
-        // echo "End : Import Brands \n\n";
-        // $import_script->brand = 1;
-        // $import_script->save();
+        echo "Start : Import Brands \n";
+        $this->importBrands();
+        echo "End : Import Brands \n\n";
+        $import_script->brand = 1;
+        $import_script->save();
 
         //Get CED categories
         echo "Start : Import categories \n";
-        // $this->importCategories();
+        $this->importCategories();
         echo "End : Import categories \n\n";
         $import_script->categories = 1;
         $import_script->save();
@@ -90,7 +94,7 @@ class SyncFromPartsDB extends Command
 
         //Get the list of all Makes and Models from PARts system and import in local database
         echo "Start : Import Makes and Models \n";
-        // $this->importMakeAndModel();
+        $this->importMakeAndModel();
         echo "End : Import Makes and Models \n\n";
         $import_script->make_model = 1;
         $import_script->save();
@@ -98,21 +102,21 @@ class SyncFromPartsDB extends Command
         //Import Products from the partsdb to local database with make, model, vehicle mapping
         echo "Start : Import Products \n";
         \Log::info("Start : Import Products");
-        // $this->importProducts();
+        $this->importProducts();
         \Log::info("End : Import Products");
         echo "End : Import Products \n\n";
 
         //delete Products from local db which are removed from parts db and not coming in sync
         echo "Start : Delete Products \n";
-        // $this->deleteProducts();
+        $this->deleteProducts();
         echo "End : Delete Products \n\n";
-
+        
         echo "Start : Import CED Product Criteria \n";
-        // $this->importCEDProductCriteria();
+        $this->importCEDProductCriteria();
         echo "End : Import CED Product Criteria \n\n";
 
         echo "Start : Import CED Product Company Web Status \n";
-        // $this->importPorductCompanyWebStatus();
+        $this->importPorductCompanyWebStatus();
         echo "End : Import CED Product Company Web Status \n\n";
         $import_script->products = 1;
         $import_script->save();
@@ -124,18 +128,17 @@ class SyncFromPartsDB extends Command
         echo "End : Import Vehicles \n";
         $import_script->vehicle = 1;
         $import_script->save();
-
+      
         //Import Product-Vehicle mapping
         echo "Start : Import Product-Vehicle mapping \n";
-        // $this->importProductVehicleMapping();
+        $this->importProductVehicleMapping();
         echo "End : Import Product-Vehicle mapping \n";
         $import_script->product_vehicles = 1;
-        $import_script->save();
-
+        $import_script->save();     
 
         //Import Vehicle Engine Code
         echo "Start : Import Vehicle Engine Code \n";
-        // $this->importVehicleEngineCode();
+        $this->importVehicleEngineCode();
         echo "End : Import Vehicle Engine Code \n";
         $import_script->vehicle_engine_code = 1;
         $import_script->save();
@@ -143,35 +146,36 @@ class SyncFromPartsDB extends Command
 
         //Import Product-image mapping
         echo "Start : Import Product-image mapping \n" . Carbon::now() . "\n";
-        // $this->importProductImageMapping();
+        $this->importProductImageMapping();
         echo "End : Import Product-image mapping \n" . Carbon::now() . "\n";
         $import_script->product_images = 1;
         $import_script->save();
-
+      
         $import_script->end = Carbon::now();
         $import_script->duration = $import_script->end->diffForHumans($import_script->start);
         $import_script->save();
         echo $import_script->end->diffForHumans($import_script->start);
     }
 
-    // private function importBrands()
-    // {
-
-    //     $db_brands = Brand::all()->pluck('id')->toArray();
-    //     $brands = $this->partsdbapirepository->getAllBrands();
-    //     $brands_array = [];
-    //     foreach ($brands as $brand) {
-    //         if ($brand->BrandName != "TRW" && $brand->BrandName != "DOGA" && $brand->BrandName !=  "REMSA" && $brand->BrandName !=  "BOSCH") {
-    //             $brand_data = Brand::firstOrCreate(['id' => $brand->ID, 'name' => $brand->BrandName]);
-    //             $brand_data->logo = $brand->ImagesLocation . $brand->LogoFileName;
-    //             $brand_data->save();
-    //         }
-    //     }
-    // }
+    private function importBrands()
+    {
+        \Log::info("Start : Import Brands");
+        $db_brands = Brand::all()->pluck('id')->toArray();
+        $brands = $this->partsdbapirepository->getAllBrands();
+        $brands_array = [];
+        foreach ($brands as $brand) {
+            if ($brand->BrandName !=  "BOSCH" && $brand->BrandName != "DOGA" && $brand->BrandName != "Flexible Drive Testing") {
+                $brand_data = Brand::firstOrCreate(['id' => $brand->ID, 'name' => $brand->BrandName]);
+                $brand_data->logo = $brand->ImagesLocation . $brand->LogoFileName;
+                $brand_data->save();
+            }
+        }
+        \Log::info("End : Import Brands");
+    }
 
     private function importCategories()
     {
-
+        \Log::info("Start : Import Categories");
         $db_categories = Category::all()->pluck('id')->toArray();
         $categories = $this->partsdbapirepository->getAllCategories();
 
@@ -189,11 +193,12 @@ class SyncFromPartsDB extends Command
             $category_data->image = $category->CategoryImage;
             $category_data->save();
         }
+        \Log::info("End : Import Categories");
     }
 
     private function importMakeAndModel()
     {
-
+        \Log::info("Start : Import MakeandModel");
         $makes_and_models = $this->partsdbapirepository->getAllMakesAndModels();
         $db_makes = Make::all()->pluck('id')->toArray();
         $makes_array = [];
@@ -231,11 +236,12 @@ class SyncFromPartsDB extends Command
             Models::insert($models_array);
             $models_array = [];
         }
+        \Log::info("End : Import MakeandModel");
     }
 
     private function importProducts()
     {
-
+        \Log::info("Start : Import Products");
         $this->createProductsTempTable();
 
         $db_brands = Brand::all()->pluck('id')->toArray();
@@ -248,80 +254,88 @@ class SyncFromPartsDB extends Command
             // $products = $this->partsdbapirepository->getProductsSubscribed($brand_id);
             // echo "Brand ID : " . $brand_id . " > Products Fetched : " . count($products) . "\n";
 
-            $PageNum = 1;
-            while ($products = $this->partsdbapirepository->getProductsSubscribed($brand_id, $PageNum, 10000)) {
-                echo "Brand ID : " . $brand_id . " > PageNum : " . $PageNum . " > Products Fetched : " . count($products) . "\n";
-                \Log::info("Brand ID : " . $brand_id . " > PageNum : " . $PageNum . " > Products Fetched : " . count($products));
-
+            // $PageNum = 1;
+            // while ($products = $this->partsdbapirepository->getProductsSubscribed($brand_id, $PageNum, 10000)) {
+            // $products = $this->partsdbapirepository->getProductsSubscribed(6370, $PageNum, 10000);    
+            // $products = $this->partsdbapirepository->getCEDProductsSubscribed($brand_id, $this->date_convert);
+            $products = $this->partsdbapirepository->getCEDProductsSubscribed($brand_id);
+            echo "Brand ID : " . $brand_id . " > Products Fetched : " . count($products) . "\n";
+            \Log::info("Brand ID : " . $brand_id . " > Products Fetched : " . count($products));
+            
+            if (isset($products) && !empty($products)) {
                 foreach ($products as $product) {
+                    //filter with product CompanyWeb status Live 
+                    if($product->CompanyWeb =='L'){                    
+                        //fetch product categories
+                        $ced_product_categories =  $this->partsdbapirepository->getCEDProductCategories($product->ProductNr, $product->BrandID);
 
-                    //fetch product categories
-                    $ced_product_categories =  $this->partsdbapirepository->getCEDProductCategories($product->ProductNr, $product->BrandID);
+                            if (count($ced_product_categories) > 0) {
 
-                    if (count($ced_product_categories) > 0) {
+                                foreach ($ced_product_categories as $ced_product_category) {
 
-                        foreach ($ced_product_categories as $ced_product_category) {
+                                    //fetch product linked parts
+                                    $corresponding_numbers = $this->partsdbapirepository->getProductCorrespondingPartNmuber($product->BrandID, $product->ProductNr, $ced_product_category->CompanySKU);
 
-                            //fetch product linked parts
-                            $corresponding_numbers = $this->partsdbapirepository->getProductCorrespondingPartNmuber($product->BrandID, $product->ProductNr, $ced_product_category->CompanySKU);
-
-                            $cross_reference_numbers = $associated_part_numbers = [];
-                            if (count($corresponding_numbers) > 0) {
-                                foreach ($corresponding_numbers as $corresponding_number) {
-                                    if ($corresponding_number->LinkType == 'Associated Parts') {
-                                        $associated_part_numbers[] = $corresponding_number->LinkProductNr;
-                                    } else if ($corresponding_number->LinkType == 'Cross Reference') {
-                                        $cross_reference_numbers[] = $corresponding_number->LinkProductNr;
+                                    $cross_reference_numbers = $associated_part_numbers = [];
+                                    if (count($corresponding_numbers) > 0) {
+                                        foreach ($corresponding_numbers as $corresponding_number) {
+                                            if ($corresponding_number->LinkType == 'Associated Parts') {
+                                                $associated_part_numbers[] = $corresponding_number->LinkProductNr;
+                                            } else if ($corresponding_number->LinkType == 'Cross Reference') {
+                                                $cross_reference_numbers[] = $corresponding_number->LinkProductNr;
+                                            }
+                                        }
                                     }
+
+                                    //Fetch product attributes
+                                    $product_critearea =  $this->getProductAttributes($product->BrandID, $product->ProductNr, $product->StandardDescriptionID);
+
+                                    $product_details = [
+                                        'brand_id' => $product->BrandID,
+                                        'product_nr' => $product->ProductNr,
+                                        'name' => $product->StandardDescription,
+                                        'description' => $product->StandardDescription,
+                                        'cross_reference_numbers' => implode(',', $cross_reference_numbers),
+                                        'associated_part_numbers' => implode(',', $associated_part_numbers),
+                                        'company_sku' => $ced_product_category->CompanySKU,
+                                        'standard_description_id' => $product->StandardDescriptionID,
+                                        'last_updated' => $this->last_updated
+                                    ];
+
+                                    $product_nr_sku_category[$product->ProductNr . "_" . $ced_product_category->CompanySKU] = $ced_product_category->CategoryID;
+                                    $products_array[] = array_merge($product_details, $product_critearea);
                                 }
+                            } 
+                            else {
+                                //if category mapping not found
+                                //Fetch product attributes
+                                $product_critearea =  $this->getProductAttributes($product->BrandID, $product->ProductNr, $product->StandardDescriptionID);
+
+                                $product_details = [
+                                    'brand_id' => $product->BrandID,
+                                    'product_nr' => $product->ProductNr,
+                                    'name' => $product->StandardDescription,
+                                    'description' => $product->StandardDescription,
+                                    'cross_reference_numbers' => '',
+                                    'associated_part_numbers' => '',
+                                    'company_sku' => $product->CompanySKU,
+                                    'standard_description_id' => $product->StandardDescriptionID,
+                                    'last_updated' => $this->last_updated
+                                ];
+
+                                // $product_nr_sku_category[$product->ProductNr . "_" . $ced_product_category->CompanySKU] = $ced_product_category->CategoryID;
+                                $products_array[] = array_merge($product_details, $product_critearea);
                             }
 
-                            //Fetch product attributes
-                            $product_critearea =  $this->getProductAttributes($product->BrandID, $product->ProductNr, $product->StandardDescriptionID);
-
-                            $product_details = [
-                                'brand_id' => $product->BrandID,
-                                'product_nr' => $product->ProductNr,
-                                'name' => $product->StandardDescription,
-                                'description' => $product->StandardDescription,
-                                'cross_reference_numbers' => implode(',', $cross_reference_numbers),
-                                'associated_part_numbers' => implode(',', $associated_part_numbers),
-                                'company_sku' => $ced_product_category->CompanySKU,
-                                'standard_description_id' => $product->StandardDescriptionID,
-                                'last_updated' => $this->last_updated
-                            ];
-
-                            $product_nr_sku_category[$product->ProductNr . "_" . $ced_product_category->CompanySKU] = $ced_product_category->CategoryID;
-                            $products_array[] = array_merge($product_details, $product_critearea);
-                        }
-                    } else {
-                        //if category mapping not found
-                        //Fetch product attributes
-                        $product_critearea =  $this->getProductAttributes($product->BrandID, $product->ProductNr, $product->StandardDescriptionID);
-
-                        $product_details = [
-                            'brand_id' => $product->BrandID,
-                            'product_nr' => $product->ProductNr,
-                            'name' => $product->StandardDescription,
-                            'description' => $product->StandardDescription,
-                            'cross_reference_numbers' => '',
-                            'associated_part_numbers' => '',
-                            'company_sku' => '',
-                            'standard_description_id' => $product->StandardDescriptionID,
-                            'last_updated' => $this->last_updated
-                        ];
-
-                        $products_array[] = array_merge($product_details, $product_critearea);
-                    }
-
-                    if (count($products_array) >= 1000) {
-                        $this->process($products_array, 'products_tmp');
-                        $this->processProductCategoryMapping($product_nr_sku_category);
-                        $products_array = [];
-                        $product_nr_sku_category = [];
+                            if (count($products_array) >= 1000) {
+                                $this->process($products_array, 'products_tmp');
+                                $this->processProductCategoryMapping($product_nr_sku_category);
+                                $products_array = [];
+                                $product_nr_sku_category = [];
+                            }
                     }
                 }
-                $PageNum++;
+                // $PageNum++;
             }
         }
 
@@ -333,11 +347,14 @@ class SyncFromPartsDB extends Command
         }
 
         $this->dropTable('products_tmp');
+        \Log::info("End : Import Products");
     }
 
     private function deleteProducts()
     {
+        \Log::info("Start : Delete Products");
         Product::where('last_updated', '<>', $this->last_updated)->delete();
+        \Log::info("End : Delete Products");
     }
 
     private function processProductCategoryMapping($product_nr_sku_category)
@@ -351,14 +368,15 @@ class SyncFromPartsDB extends Command
 
         foreach ($product_nr_sku_category as $product_nr_sku => $category_id) {
 
-            $product_id = $db_products[$product_nr_sku];
-
-            if (!in_array($product_id, $db_product_category)) {
-                $db_product_category_new[] = [
-                    'product_id' => $product_id,
-                    'category_id' => $category_id
-                ];
-            }
+            if(isset($db_products[$product_nr_sku])){
+                $product_id = $db_products[$product_nr_sku];
+                if (!in_array($product_id, $db_product_category)) {
+                    $db_product_category_new[] = [
+                        'product_id' => $product_id,
+                        'category_id' => $category_id
+                    ];
+                }
+            }            
         }
 
         if (count($db_product_category_new) > 0) {
@@ -379,28 +397,29 @@ class SyncFromPartsDB extends Command
         ];
 
         $product_critearea =  $this->partsdbapirepository->getProductCriteria($brand_id, $product_nr, $standard_description_id);
+        if(isset($product_critearea) && !empty($product_critearea)){
+            if (count($product_critearea) > 0) {
 
-        if (count($product_critearea) > 0) {
+                foreach ($product_critearea as $criteara) {
 
-            foreach ($product_critearea as $criteara) {
+                    $critearea['product_nr'] = $product_nr;
+                    $critearea['brand_id'] = $brand_id;
 
-                $critearea['product_nr'] = $product_nr;
-                $critearea['brand_id'] = $brand_id;
-
-                if (isset($criteara->Criteria) && !empty($criteara->Criteria)) {
-                    if ($criteara->Criteria == 'Brake System' || $criteara->Criteria == 'Brake Type') {
-                        $critearea['brake_system'] = $criteara->Value;
-                    } elseif ($criteara->Criteria == 'Length [mm]') {
-                        $critearea['length'] = $criteara->Value;
-                    } elseif ($criteara->Criteria == 'Fitting Position') {
-                        $critearea['fitting_position'] = $criteara->Value;
-                    } elseif ($criteara->Criteria == 'Height [mm]') {
-                        $critearea['height'] = $criteara->Value;
-                    } elseif ($criteara->Criteria == 'Weight [kg]') {
-                        $critearea['weight'] = $criteara->Value;
-                    } elseif ($criteara->Criteria == 'Thickness' || $criteara->Criteria == 'Thickness [mm]') {
-                        $critearea['thickness'] = $criteara->Value;
-                    } else {
+                    if (isset($criteara->Criteria) && !empty($criteara->Criteria)) {
+                        if ($criteara->Criteria == 'Brake System' || $criteara->Criteria == 'Brake Type') {
+                            $critearea['brake_system'] = $criteara->Value;
+                        } elseif ($criteara->Criteria == 'Length [mm]') {
+                            $critearea['length'] = $criteara->Value;
+                        } elseif ($criteara->Criteria == 'Fitting Position') {
+                            $critearea['fitting_position'] = $criteara->Value;
+                        } elseif ($criteara->Criteria == 'Height [mm]') {
+                            $critearea['height'] = $criteara->Value;
+                        } elseif ($criteara->Criteria == 'Weight [kg]') {
+                            $critearea['weight'] = $criteara->Value;
+                        } elseif ($criteara->Criteria == 'Thickness' || $criteara->Criteria == 'Thickness [mm]') {
+                            $critearea['thickness'] = $criteara->Value;
+                        } else {
+                        }
                     }
                 }
             }
@@ -509,39 +528,43 @@ class SyncFromPartsDB extends Command
         //$db_vehicles = Vehicle::all()->pluck('id')->toArray();
 
         $vehicles_array = [];
+        \Log::info("Start : Import Vehicles");
         foreach ($all_models as $key => $model) {
 
             $vehicles = $this->partsdbapirepository->getAllVehicleByMakesAndModels($model['make_id'], $model['name']);
-            foreach ($vehicles as $vehicle) {
-                // if(is_array($db_vehicles) && !in_array($vehicle->VehicleID, $db_vehicles)) {
-                try {
-                    $vehicles_array[] = [
-                        'id' => $vehicle->VehicleID,
-                        'make_id' =>  $vehicle->MakeID,
-                        'model_id' =>  $model->id,
-                        'year_from' => $vehicle->YearFrom,
-                        'year_to' => $vehicle->YearTo,
-                        'year_range' => $vehicle->YearRange,
-                        'sub_model' => $vehicle->Series,
-                        'chassis_code' => $vehicle->Chassis,
-                        'cc' => $vehicle->cc,
-                        'power' => $vehicle->KW,
-                        'body_type' => $vehicle->BodyType,
-                        'brake_system' => $vehicle->BrakeSystem,
-                        // 'created_at' => Carbon::now(),
-                        // 'updated_at' => Carbon::now()
-                    ];
-                } catch (\Exception $e) {
-                    \Log::info($vehicle->toArray());
-                }
+            
+            if(isset($vehicles) && !empty($vehicles)){                        
+                foreach ($vehicles as $vehicle) {
+                    // if(is_array($db_vehicles) && !in_array($vehicle->VehicleID, $db_vehicles)) {
+                    try {
+                        $vehicles_array[] = [
+                            'id' => $vehicle->VehicleID,
+                            'make_id' =>  $vehicle->MakeID,
+                            'model_id' =>  $model->id,
+                            'year_from' => $vehicle->YearFrom,
+                            'year_to' => $vehicle->YearTo,
+                            'year_range' => $vehicle->YearRange,
+                            'sub_model' => $vehicle->Series,
+                            'chassis_code' => $vehicle->Chassis,
+                            'cc' => $vehicle->cc,
+                            'power' => $vehicle->KW,
+                            'body_type' => $vehicle->BodyType,
+                            'brake_system' => $vehicle->BrakeSystem,
+                            // 'created_at' => Carbon::now(),
+                            // 'updated_at' => Carbon::now()
+                        ];
+                    } catch (\Exception $e) {
+                        \Log::info($vehicle->toArray());
+                    }
 
-                //}
+                    //}
 
-                //echo "Vehicles Fetched : " . count($vehicles_array) . "\n";
-                if (count($vehicles_array) >= 1000) {
-                    VehicleTemp::insert($vehicles_array);
-                    echo "Vehicles Inserted : " . count($vehicles_array) . "\n\n";
-                    $vehicles_array = [];
+                    //echo "Vehicles Fetched : " . count($vehicles_array) . "\n";
+                    if (count($vehicles_array) >= 1000) {
+                        VehicleTemp::insert($vehicles_array);
+                        echo "Vehicles Inserted : " . count($vehicles_array) . "\n\n";
+                        $vehicles_array = [];
+                    }
                 }
             }
         }
@@ -556,6 +579,7 @@ class SyncFromPartsDB extends Command
         $this->insertOrUpdateVehicles();
         echo "End : insertOrUpdateVehicles \n";
         $this->truncateTable('vehicle_tmp');
+        \Log::info("End : Import Vehicles");
     }
 
     private function insertOrUpdateVehicles()
@@ -568,7 +592,7 @@ class SyncFromPartsDB extends Command
 
     private function importVehicleEngineCode()
     {
-
+        \Log::info("Start : Import Vehicleenginecode");
         $this->truncateTable('vehicle_tmp');
 
         $vehicle_ids = Vehicle::all()->pluck('id')->toArray();
@@ -601,6 +625,7 @@ class SyncFromPartsDB extends Command
         echo "End : insertOrUpdateVehiclesEngineCode \n";
 
         $this->truncateTable('vehicle_tmp');
+        \Log::info("End : Import vehicleenginecode");
     }
 
     private function insertOrUpdateVehiclesEngineCode()
@@ -613,6 +638,7 @@ class SyncFromPartsDB extends Command
 
     private function importProductVehicleMapping()
     {
+        \Log::info("Start : Import Productvehiclemapping");
         $db_products_nr = Product::selectRaw(DB::raw('CONCAT(product_nr, "_", brand_id) as product_brand, id'))->pluck('product_brand', 'id')->toArray();
         $db_vehicles = Vehicle::all()->pluck('id', 'id')->toArray();
         $product_vehicle = ProductVehicle::selectRaw(DB::raw('CONCAT(product_id, "_", vehicle_id) as product_vehicle'))->pluck('product_vehicle')->toArray();
@@ -653,11 +679,12 @@ class SyncFromPartsDB extends Command
             ProductVehicle::insert($product_vehicle_array);
             $product_vehicle_array = [];
         }
+        \Log::info("End : Import Productvehiclemapping");
     }
 
     private function importProductImageMapping()
     {
-
+        \Log::info("Start : Import productimagemapping");
         $product_image_array = [];
 
         $location = 0;
@@ -665,37 +692,45 @@ class SyncFromPartsDB extends Command
         $products = Product::selectRaw(DB::raw('CONCAT(product_nr, "_", brand_id) as product_brand, id'))->pluck('product_brand', 'id')->toArray();
         $stored_images = ProductImage::selectRaw(DB::raw('CONCAT(product_id, "_", image) as product_image'))->pluck('product_image')->toArray();
 
-        foreach ($products as $product_id => $product) {
-            list($product_nr, $brand_id) = explode("_", $product);
+        if(isset($products) && !empty($products)){        
+            foreach ($products as $product_id => $product) {
+                list($product_nr, $brand_id) = explode("_", $product);
 
-            $product_images =  $this->partsdbapirepository->getProductsImages($brand_id, $product_nr);
-            foreach ($product_images as  $product_image) {
-                try {
-                    if (isset($product_image->ImagesLocation) && !empty($product_image->ImagesLocation)) {
+                $product_images =  $this->partsdbapirepository->getProductsImages($brand_id, $product_nr);
+                foreach ($product_images as  $product_image) {
+                    try {
+                        if (isset($product_image->ImagesLocation) && !empty($product_image->ImagesLocation)) {
 
-                        $path = $this->PRODUCTS_PATH . $product_image->FileName;
-                        $exist_image = Storage::disk('public')->exists($path);
-                        $ext = $product_image->Extension;
+                            $path = $this->PRODUCTS_PATH . $product_image->FileName;
+                            $exist_image = Storage::disk('public')->exists($path);
+                            $ext = $product_image->Extension;
 
-                        if ($ext != "PDF") {
-                            if (!$exist_image) {
-                                $contents = file_get_contents($product_image->ImagesLocation);
-                                $location = Storage::disk('public')->put($path, $contents);
-                            }
+                            if ($ext != "PDF") {
+                                if (!$exist_image) {
+                                    $contents = file_get_contents($product_image->ImagesLocation);
+                                    $location = Storage::disk('public')->put($path, $contents);
+                                }
 
-                            if ($location || !in_array($product_id . "_" . $product_image->FileName, $stored_images)) {
-                                $product_image_array[] = [
-                                    'product_id' => $product_id,
-                                    'image' =>  $product_image->FileName
-                                ];
+                                if ($location || !in_array($product_id . "_" . $product_image->FileName, $stored_images)) {
+                                    $product_image_array[] = [
+                                        'product_id' => $product_id,
+                                        'image' =>  $product_image->FileName
+                                    ];
 
-                                $stored_images[] = $product_id . "_" . $product_image->FileName;
+                                    $stored_images[] = $product_id . "_" . $product_image->FileName;
+                                }
                             }
                         }
-                    }
-                } catch (\Exception $e) {
+                    } catch (\Exception $e) {
 
-                    echo $e->getMessage() . "\n";
+                        echo $e->getMessage() . "\n";
+                    }
+                }
+
+                if (count($product_image_array) >= 1000) {
+                    echo "\n Images Imported : " . count($product_image_array) . "\n";
+                    ProductImage::insert($product_image_array);
+                    $product_image_array = [];
                 }
             }
 
@@ -711,11 +746,12 @@ class SyncFromPartsDB extends Command
             ProductImage::insert($product_image_array);
             $product_image_array = [];
         }
+        \Log::info("End : Import productimagemapping");
     }
 
     private function importCEDProductCriteria()
     {
-
+        \Log::info("Start : Import CEDProductCriteria");
         $brands = Brand::all()->pluck('id')->toArray();
         foreach ($brands as $brand_id) {
 
@@ -737,22 +773,29 @@ class SyncFromPartsDB extends Command
                 }
             }
         }
+        \Log::info("End : Import CEDProductCriteria");
     }
 
     private function importPorductCompanyWebStatus()
     {
+        \Log::info("Start : Import ProductCompanywebstatus");
         $this->createProductCompanyWebStatusTempTable();
         $db_brands = Brand::all()->pluck('id')->toArray();
         $products_array = [];
         foreach ($db_brands as $brand_id) {
 
             $products = $this->partsdbapirepository->getCEDProductsSubscribed($brand_id);
+            if (isset($products) && !empty($products)) {
             foreach ($products as $product) {
-                $products_array[] = [
-                    'company_sku' => $product->CompanySKU,
-                    'product_nr' => $product->ProductNr,
-                    'company_web_status' => $product->CompanyWeb
-                ];
+                    //filter with product CompanyWeb status Live 
+                    if($product->CompanyWeb =='L'){ 
+                        $products_array[] = [
+                            'company_sku' => $product->CompanySKU,
+                            'product_nr' => $product->ProductNr,
+                            'company_web_status' => $product->CompanyWeb
+                        ];
+                    }                
+                }
             }
 
             if (count($products_array) >= 1000) {
@@ -767,6 +810,7 @@ class SyncFromPartsDB extends Command
         }
 
         $this->dropTable('porduct_company_web_statuses_tmp');
+        \Log::info("End : Import ProductCompanywebstatus");
     }
 
     private function createProductCompanyWebStatusTempTable()

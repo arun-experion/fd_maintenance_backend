@@ -43,16 +43,15 @@ trait API {
 
     public function callPartsDBAPI($api, $params = array()) {
         if(is_array(Session::get('Auth-Cookie'))) {
-            $auth_cookie = Session::get('Auth-Cookie')[1];
+            $auth_cookie = Session::get('Auth-Cookie')[0];
         } else {
             $auth_cookie = Session::get('Auth-Cookie');
-        }
+        }        
         $url = config('partsdb.endpoint') . $api;
         $response = Curl::to($url)
             ->withData($params)
             ->withHeader('cookie: ' . $auth_cookie)
-            ->get();
-
+            ->get();           
         return json_decode($response);
     }
 }

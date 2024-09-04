@@ -98,10 +98,11 @@ class Product extends Model
 
     public function scopeCompanyWebStatus($query)
     {
-        return $query->whereExists(function ($query) {
-            $query->select(\DB::raw(1))
-                ->from('porduct_company_web_statuses as pcws')
-                ->whereRaw('pcws.product_nr = products.product_nr AND pcws.company_sku = products.company_sku AND pcws.company_web_status = "L"');
-        });
+        $query->leftJoin("porduct_company_web_statuses", function ($join) {
+            $join->on("products.product_nr", "=", "porduct_company_web_statuses.product_nr");
+            $join->on("products.company_sku", "=", "porduct_company_web_statuses.company_sku");
+        })
+            ->where("porduct_company_web_statuses.company_web_status", "=", "L");
+        return $query;
     }
 }

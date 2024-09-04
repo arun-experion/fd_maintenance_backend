@@ -19,6 +19,7 @@ class PartsDBAPIRepository extends BaseRepository
             ->get();
 
         Session::put('Auth-Cookie', $response->headers['Set-Cookie']);
+        // Session::put('Auth-Cookie', "__cf_bm=Dw0lJxzTZRo1iEe2R1e6uJ07GqhOt7eFnVwaZFJQd7g-1701663772-0-AWoPBtyoBcG4BbPn82Bi4uk+YHMlaXFRrb82QokmS7CWMdrpRFHFeng3hWxdTJCRIc6OrAli0SnkJILFKsZFe9I=; .ASPXAUTH=4DC2C3C2A1D8C46F8CC87641E7D33F9AFAE58AE603B44B85522135EBEB15FFAE3D2861F25C89B21706DAB2E3F5616BDE2CE7F625C1089FE15B1F12EA7CBA1FC1EB187485F31776C112EB0BB844747C9D1A37A6A8AB9D764F1AE3F2F93673919926151BA43A478260E29F8CF7F9C254D193FE15D45F3926447A144EBEA0BD12215FABE6575061BE96591ACAF9C74051B903932B11F03F3383F909E0BC568D3C783E74AB4263F839FD2C6114FF8469074FD0A24163DBF624D0D0F4B91A3D46BE6C; ARRAffinity=5cd43b4c396c2fb1fed77cb0b0a148160132ac60bb954aed212dd2b6ed456ec2; ARRAffinitySameSite=5cd43b4c396c2fb1fed77cb0b0a148160132ac60bb954aed212dd2b6ed456ec2; ASP.NET_SessionId=kd3jtddqf1zilfvxc405yivb");        
     }
 
     public function getAllBrands()
@@ -260,9 +261,14 @@ class PartsDBAPIRepository extends BaseRepository
 
         return $criterias;
     }
-
+    // public function getCEDProductsSubscribed($brand_id, $Date)
     public function getCEDProductsSubscribed($brand_id)
     {
+        // if($brand_id == 6370){
+        //     $products = $this->callPartsDBAPI(config('partsdb.ced-products-subscribed'), ['BrandID' => $brand_id, 'Date' => $Date]);
+        // } else {
+        //     $products = $this->callPartsDBAPI(config('partsdb.ced-products-subscribed'), ['BrandID' => $brand_id]);
+        // }
         $products = $this->callPartsDBAPI(config('partsdb.ced-products-subscribed'), ['BrandID' => $brand_id]);
         return $products ?? [];
     }

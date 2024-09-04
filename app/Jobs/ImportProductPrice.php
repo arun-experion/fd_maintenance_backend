@@ -135,10 +135,11 @@ class ImportProductPrice implements ShouldQueue
                 foreach ($part_number_array as $part_number => $price_data) {
                     //get product from part number
 
-                    $product_data = Product::where('product_nr', $part_number)->where('company_sku', $part_number)->first();
-
-                    if (!empty($product_data)) {
-                        $product_id = $product_data->id;
+                    //$product_data = Product::where('product_nr', $part_number)->where('company_sku', $part_number)->first();
+                    $product_id = $this->getProductWithSku($part_number);
+                    
+                    if (!empty($product_id)) {
+                        //$product_id = $product_data->id;
 
                         foreach ($code_user as $key => $user_id) {
                             $price_data_select = ProductPrice::where('product_id', $product_id)->where('user_id', $user_id)->first();
