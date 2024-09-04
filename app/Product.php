@@ -71,8 +71,10 @@ class Product extends Model
 
     public function notes()
     {
-        return $this->hasMany(Note::class, 'product_id')->where('user_id', $this->getAuth())->with('user');
+        return $this->hasMany(Note::class, 'product_id')->where('user_id', $this->getAuth())->with('user')->orderBy('created_at', 'desc')
+        ->limit(1);;
     }
+    
 
     public function categories()
     {
