@@ -80,7 +80,8 @@
                                     <tbody>
                                         @foreach($order->items as $item)
                                         <tr>
-                                            <td align="center" style="padding: 8px 0;">{{$item->product->product_nr}}</td>
+                                            
+                                            <td align="center" style="padding: 8px 0;">{{$item->product->company_sku}}</td>
                                             <td align="center" style="padding: 8px 0;">{{$item->product->name}}</td>
                                             <td align="center" style="padding: 8px 0;">{{$item->qty}}</td>
                                             <td align="center" style="padding: 8px 0;">${{ number_format((float)$item->price, 2, '.', '')}}</td>

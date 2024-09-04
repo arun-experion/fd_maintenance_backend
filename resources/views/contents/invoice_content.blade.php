@@ -1,7 +1,7 @@
 <table style="width: 100%;font-family: sans-serif;border:1px solid #000;font-size: 12px;" cellpadding="10" cellspacing="0" align="center">
     <tr>
         <td align="left" style="border-bottom: 2px solid #000">
-            <img src="https://www.flexibledrive.com.au/static/themes/theme-1/images/logos/flexible-drive-logo.svg">
+            <img src="https://www.flexibledrive.com.au/static/themes/theme-1/images/logos/flexible-drive-logo.svg" style="max-width: 300px; width: 300px;">
             <br />
             <b>QUOTE/ PROFORMA INVOICE</b>
         </td>
@@ -94,7 +94,8 @@
                 @foreach($order->items as $item)
 
                 <tr align="center">
-                    <td>{{$item->product->product_nr}}</td>
+                    
+                    <td>{{$item->product->company_sku}}</td>
                     <td>{{$item->product->name}}</td>
                     <td> </td>
                     <td>{{$item->qty}}</td>

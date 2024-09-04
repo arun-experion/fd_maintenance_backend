@@ -42,8 +42,10 @@ class ProductsRepository extends BaseRepository
  	public function getProducts($filters = array(), $paginate = FALSE, $page = 1, $per_page = 20) {
         $products = Product::with(['brand','vehicles','vehicles.make','vehicles.model','images','categories','criteria']);
         $products->CompanyWebStatus();
-
+        $vehicle_regovin_count = 0;
         $combined_search = false;
+        $vehicles   = [];
+        $vehicle_ids_array = [];
         //Filter by rego number
         if(isset($filters['rego_number']) && isset($filters['state'])) {
             $vehicle_ids_rego = [];
@@ -54,6 +56,7 @@ class ProductsRepository extends BaseRepository
             if(count($vehicle_ids) > 0) {
                 $vehicle_ids_rego = array_unique($vehicle_ids);
             }
+            $vehicle_regovin_count = count($vehicle_ids_rego);
             $combined_search = true;
         }        
 
@@ -67,9 +70,9 @@ class ProductsRepository extends BaseRepository
             if(count($vehicle_ids) > 0) {
                 $vehicle_ids_vin = array_unique($vehicle_ids);
             }
+            $vehicle_regovin_count = count($vehicle_ids_vin);
             $combined_search = true;
         }
-        
         $vehicle_ids_array = [];
         if(isset($vehicle_ids_rego) && isset($vehicle_ids_vin)) {
             $vehicle_ids_array = array_intersect($vehicle_ids_rego, $vehicle_ids_vin);
@@ -78,7 +81,7 @@ class ProductsRepository extends BaseRepository
         } elseif(isset($vehicle_ids_vin)) {
             $vehicle_ids_array = $vehicle_ids_vin;
         }
-        
+        $vehicle_regovin_count = count($vehicle_ids_array);
         if($combined_search) {
             $products->whereHas('vehicles', function($query) use($vehicle_ids_array) {
                 $query->whereIn('vehicles.id', $vehicle_ids_array);
@@ -106,8 +109,8 @@ class ProductsRepository extends BaseRepository
         // Filter with product nr
         if(isset($filters['product_nr'])) {
             $products->where(function($query) use($filters) {                    
-                $query->where('product_nr', $filters['product_nr'])
-                      ->orWhere('company_sku', $filters['product_nr'])
+                $query->where('products.product_nr', $filters['product_nr'])
+                      ->orWhere('products.company_sku', $filters['product_nr'])
                       ->orWhereRaw('FIND_IN_SET("'.$filters['product_nr'].'",cross_reference_numbers)');
             });
         }
@@ -206,8 +209,8 @@ class ProductsRepository extends BaseRepository
         $qty_with_location = array();
 
         $flag_no_stock = 0;
-
-        foreach($products as &$prod) {
+        $i = 0; 
+        foreach($products as &$prod) { $i++;
             $branchWiseQty = ProductQuantity::where('product_id', $prod -> id)->get();
             $branchWiseQtyForPush = array();
             foreach($branchWiseQty as &$branchQty){
@@ -220,9 +223,12 @@ class ProductsRepository extends BaseRepository
             if ($prod->qty > 0) {
                 $flag_no_stock = 1;
             }
+            if($i == 1){
+                $prod['dashboard_vehicles'] = $vehicles;
+            }            
             array_push($qty_with_location, $prod);
         }
-        $products->data = $qty_with_location;
+        $products->data     = $qty_with_location;       
 
         // Add search history data.
         $no_stock_prducts = ProductQuantity::where('qty', 0)->get();

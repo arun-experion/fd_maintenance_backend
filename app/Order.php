@@ -8,18 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\DeliveryAddress;
 use App\PickupAddress;
+use Carbon\Carbon;
 
 class Order extends Model
 {
     use SoftDeletes;
 
-    protected $hidden = [ 'updated_at', 'deleted_at'];
-    protected $appends = ['status_label', 'status_badge', 'delivery_type','invoice_url', 'is_favourite', 'delivery_info'];
+    protected $hidden = ['updated_at', 'deleted_at'];
+    protected $appends = ['status_label', 'status_badge', 'delivery_type', 'invoice_url', 'is_favourite', 'delivery_info'];
     protected $dates = ['deleted_at'];
     protected $fillable = array('user_id', 'order_number', 'subtotal', 'gst', 'delivery', 'total', 'reference_number', 'repeat_order', 'delivery_method', 'created_at', 'updated_at', 'status', 'is_external_pickup');
 
-    public function items() {
-        return $this->hasMany( OrderProduct::class, 'order_id' );
+    public function items()
+    {
+        return $this->hasMany(OrderProduct::class, 'order_id');
     }
 
     public function favourite()
@@ -31,7 +33,7 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    
+
     public function getIsFavouriteAttribute()
     {
         return (bool) $this->favourite()->first();
@@ -54,7 +56,7 @@ class Order extends Model
 
     public function getInvoiceUrlAttribute()
     {
-        if($this->invoice && Storage::disk('public')->exists(Config::get('constant.INVOICES_PATH') . $this->invoice)) {
+        if ($this->invoice && Storage::disk('public')->exists(Config::get('constant.INVOICES_PATH') . $this->invoice)) {
             $invoice_url = Storage::disk('public')->url(Config::get('constant.INVOICES_PATH') . $this->invoice);
         } else {
             $invoice_url = '';
@@ -65,29 +67,29 @@ class Order extends Model
     public function getDeliveryInfoAttribute()
     {
         $pickup = $delivery = null;
-        
+
         $items = $this->items->toArray();
         $delivery_address = array_values(array_filter(array_unique(array_column($items, 'delivery_address_id'))));
         $pickup_address = array_values(array_filter(array_unique(array_column($items, 'pickup_address_id'))));
-        
-        if(!empty($delivery_address)) {
+
+        if (!empty($delivery_address)) {
             list($delivery_address_id) = $delivery_address;
-            if($delivery_address_id > 0) {
+            if ($delivery_address_id > 0) {
                 $delivery = DeliveryAddress::find($delivery_address_id)->toArray();
                 $delivery['products'] = OrderProduct::where('order_id', $this->id)->where('delivery_address_id', $delivery_address_id)->pluck('product_id');
             }
         }
 
-        if(!empty($pickup_address)) {
+        if (!empty($pickup_address)) {
             $address = PickupAddress::with('location')->where('id', $pickup_address)->first()->toArray();
-            if($pickup_address > 0 && $address["id"] > 0) {
+            if ($pickup_address > 0 && $address["id"] > 0) {
                 $pickup = Branch::where('id', $address["pickup_location_id"])->first()->toArray();
             }
         }
-        $is_external = false;        
-        if (!empty($pickup_address) && !empty($delivery_address)){
-          $is_external = true;
-        } 
+        $is_external = false;
+        if (!empty($pickup_address) && !empty($delivery_address)) {
+            $is_external = true;
+        }
         $info = [
             'delivery_method' => $this->delivery_method,
             'delivery' => $delivery,
@@ -96,5 +98,21 @@ class Order extends Model
         ];
 
         return $info;
+    }
+
+    public function getCreatedAtAttribute()
+    {
+        $time_zone_data = Config::get('constant.time_zone');
+        $user_state = auth()->user()->state;
+        if (!empty($time_zone_data)) {
+            if (array_key_exists($user_state, $time_zone_data)) {
+                $user_current_time_zone = $time_zone_data[$user_state];
+            } else {
+                $user_current_time_zone = 'Australia/Adelaide';
+            }
+        } else {
+            $user_current_time_zone = 'Australia/Adelaide';
+        }
+        return Carbon::parse($this->attributes['created_at'])->timezone($user_current_time_zone)->format('Y-m-d H:i:s');
     }
 }

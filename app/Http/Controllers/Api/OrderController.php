@@ -853,7 +853,8 @@ class OrderController extends BaseController
 
         $invoice_save = Storage::disk('public')->put($store_path, $content);
 
-        $invoice_path = Storage::disk('public')->url($store_path);
+        //$invoice_path = Storage::disk('public')->url($store_path);
+        $invoice_path = base_path().'/storage/app/public/'.$store_path;
 
         $pdf_data = [
             'file_name' => $file_name,
