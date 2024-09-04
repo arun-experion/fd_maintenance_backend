@@ -29,13 +29,13 @@ class NoteController extends BaseController
             $validator = \Validator::make($request->all(), [
                 "product" => "required|integer|exists:products,id",
                 "description" => "required|string|min:2",
-                // "cross_ref" => "required|string|min:1",
-                // "crossref_buy_price" =>"required|numeric|min:0",
-                // "grades" => "required|string|min:1",
-                // "delivery_time" => "required",
-                // "add_to_range"=>"required|string|in:Yes,No", 
-                // "hold_stock"=>"required|string|in:Yes,No", 
-                // "target_buy_price"=>"required|numeric|min:0",
+                "cross_ref" => "required|string|min:1",
+                "crossref_buy_price" =>"required|numeric|min:0",
+                "grades" => "required|string|min:1",
+                "delivery_time" => "required|string|min:1",
+                "add_to_range"=>"required|string|in:Yes,No", 
+                "hold_stock"=>"required|string|in:Yes,No", 
+                "target_buy_price"=>"required|numeric|min:0",
 
             ]);
 
@@ -47,13 +47,13 @@ class NoteController extends BaseController
                 'user_id' => Auth::id(),
                 'product_id' => $request->product,
                 'description' => $request->description,
-                // 'cross_ref' => $request->cross_ref,
-                // 'crossref_buy_price' => $request->crossref_buy_price,
-                // 'grades' => $request->grades,
-                // 'delivery_time' => $request->delivery_time,
-                // 'add_to_range' => $request->add_to_range,
-                // 'hold_stock' => $request->hold_stock,
-                // 'target_buy_price' => $request->target_buy_price,
+                'cross_ref' => $request->cross_ref,
+                'crossref_buy_price' => $request->crossref_buy_price,
+                'grades' => $request->grades,
+                'delivery_time' => $request->delivery_time,
+                'add_to_range' => $request->add_to_range,
+                'hold_stock' => $request->hold_stock,
+                'target_buy_price' => $request->target_buy_price,
             ];
 
             $save_note = Note::create($note_array);
