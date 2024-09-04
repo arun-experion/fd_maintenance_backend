@@ -120,7 +120,6 @@ class ProductController extends BaseController
             } else {
                 $product['associated_parts'] = [];
             }
-           
             $qty_with_location = array();
             $branchWiseQty = ProductQuantity::where('product_id', $product['id'])->get();
             $branchWiseQtyForPush = array();
