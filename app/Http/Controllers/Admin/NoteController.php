@@ -34,13 +34,34 @@ class NoteController extends Controller
               
                 return $data->product->product_nr;
             })
+            ->editColumn('cross_ref', function ($data) {
+                return $data->cross_ref;
+            })
+            ->editColumn('crossref_buy_price', function ($data) {
+                return $data->crossref_buy_price;
+            })
+            ->editColumn('grades', function ($data) {
+                return $data->grades;
+            })
+            ->editColumn('delivery_time', function ($data) {
+                return $data->delivery_time;
+            })
+            ->editColumn('add_to_range', function ($data) {
+                return $data->add_to_range;
+            })
+            ->editColumn('hold_stock', function ($data) {
+                return $data->hold_stock;
+            })
+            ->editColumn('target_buy_price', function ($data) {
+                return $data->target_buy_price;
+            })
             ->editColumn('description', function ($data) {
                 return $data->description;
             })
             ->editColumn('user', function ($data) {
                 return $data->user->name;
             })
-            ->rawColumns(['date_string','date', 'product_nr', 'description', 'user'])
+            ->rawColumns(['date_string','date', 'product_nr', 'cross_ref', 'crossref_buy_price', 'grades', 'delivery_time', 'add_to_range', 'hold_stock', 'target_buy_price', 'description', 'user'])
             ->make(true);
     }
 

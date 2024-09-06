@@ -1,5 +1,17 @@
 @extends('layouts.app')
 @section('page-title','FlexibleDrive | Product Notes')
+<style>
+    @media screen and (max-width: 600px) {
+    div.dataTables_length label {
+        display: flex;
+        align-items: left;
+    }
+    div.dataTables_wrapper,div.dataTables_filter{
+        margin-right:100px ;
+        align-items: left;
+    }
+    }
+</style>
 @section('content')
 <div class="content">
     <header class="page-header">
@@ -22,12 +34,19 @@
 
                     <!-- <h5 class="card-header"></h5> -->
                     <div class="card-body">
-                        <table id="notes-table" class="table table-striped table-bordered table-data" style="width:100%">
+                        <table id="notes-table" class="table table-striped table-bordered table-data table-responsive" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>date_string</th>
                                     <th>Date</th>
                                     <th>Product Number</th>
+                                    <th>Cross Ref</th>
+                                    <th>Cross Ref Buy Price</th>
+                                    <th>Grades</th>
+                                    <th>Delivery Time</th>
+                                    <th>Add to range</th>
+                                    <th>Hold Stock</th>
+                                    <th>Target Buy Price</th>
                                     <th>Note</th>
                                     <th>User</th>
                                 </tr>
@@ -89,6 +108,34 @@
                 {
                     data: "product_nr",
                     name: "product_nr"
+                },
+                {
+                    data: "cross_ref",
+                    name: "cross_ref"
+                },
+                {
+                    data: "crossref_buy_price",
+                    name: "crossref_buy_price"
+                },
+                {
+                    data: "grades",
+                    name: "grades"
+                },
+                {
+                    data: "delivery_time",
+                    name: "delivery_time"
+                },
+                {
+                    data: "add_to_range",
+                    name: "add_to_range"
+                },
+                {
+                    data: "hold_stock",
+                    name: "hold_stock"
+                },
+                {
+                    data: "target_buy_price",
+                    name: "target_buy_price"
                 },
                 {
                     data: "description",
