@@ -32,7 +32,7 @@ class CategoryController extends BaseController
                 }
             } else {
                 foreach($fitting_positions as $fitting_position) {
-                    $fitting_position->product_count = Product::where('fitting_position', 'like', '%' . $fitting_position['fitting_position'] . '%')->count();
+                    $fitting_position->product_count = Product::where('fitting_position', '=', $fitting_position['fitting_position'])->count();
                 }
             }
 
