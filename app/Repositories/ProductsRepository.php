@@ -117,7 +117,7 @@ class ProductsRepository extends BaseRepository
 
         if (isset($filters['fitting_position'])) {
             $products->where(function($query) use($filters) {                    
-                $query->where('fitting_position', 'like', '%'.$filters['fitting_position'].'%');
+                $query->where('fitting_position', '=',$filters['fitting_position']);
             });
         }
 

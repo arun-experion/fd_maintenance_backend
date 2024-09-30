@@ -34,7 +34,7 @@
 
                     <!-- <h5 class="card-header"></h5> -->
                     <div class="card-body">
-                        <table id="notes-table" class="table table-striped table-bordered table-data table-responsive" style="width:100%">
+                        <table id="notes-table" class="table table-striped table-bordered table-data " style="width:100%">
                             <thead>
                                 <tr>
                                     <th>date_string</th>
